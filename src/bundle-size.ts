@@ -22,15 +22,24 @@ export async function getNpmBundleSize(
 ): Promise<BundleSizeInfo> {
   try {
     const pkg = version ? `${packageName}@${version}` : packageName;
-    const response = await fetch(
-      `https://bundlephobia.com/api/size?package=${encodeURIComponent(pkg)}`
-    );
+    
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    
+    try {
+      const response = await fetch(
+        `https://bundlephobia.com/api/size?package=${encodeURIComponent(pkg)}`,
+        { signal: controller.signal }
+      );
 
-    if (!response.ok) {
-      throw new Error(`Failed to get bundle size: ${response.statusText}`);
-    }
+      clearTimeout(timeoutId);
 
-    const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`Failed to get bundle size: ${response.statusText}`);
+      }
+
+      const data = await response.json();
 
     return {
       package: packageName,
@@ -42,6 +51,13 @@ export async function getNpmBundleSize(
       },
       registry: "npm",
     };
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        throw new Error('Request timeout: Bundlephobia API took too long to respond');
+      }
+      throw fetchError;
+    }
   } catch (error) {
     return {
       package: packageName,
