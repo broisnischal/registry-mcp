@@ -15,7 +15,7 @@ A unified tool to search across multiple JavaScript/TypeScript package registrie
 ### Deno
 
 ```ts
-import { search, searchAll } from "jsr:@registry/mcp@0.1.0";
+import { search, searchAll } from "jsr:@registry/mcp@0.1.1";
 ```
 
 ### npm / Node.js
