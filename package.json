@@ -1,0 +1,10 @@
+{
+    "name": "@mcp/registry-hub",
+    "version": "0.1.0",
+    "type": "module",
+    "exports": "./mod.ts",
+    "scripts": {
+        "test": "deno test"
+    },
+    "dependencies": {}
+}
