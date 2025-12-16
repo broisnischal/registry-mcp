@@ -2,257 +2,22 @@
 
 A unified tool to search across multiple JavaScript/TypeScript package registries including npm, JSR, Deno, and more. Auto-detects the appropriate registry and provides comprehensive library information.
 
+**@registry/mcp** is a powerful Model Context Protocol (MCP) server that provides AI assistants with comprehensive package registry tools. It enables searching, analyzing, and managing packages across npm, JSR, Deno, and multiple CDN providers.
+
 ## Features
 
-- 🔍 **Multi-Registry Search**: Search across npm, JSR, and Deno registries
-- 🎯 **Auto-Detection**: Automatically detects which registry to search based on package name patterns
-- 📦 **Unified API**: Consistent interface for all registries
-- ⚡ **Fast**: Parallel search across all registries
-- 🌐 **Cross-Platform**: Works in Deno, Node.js, and other JavaScript runtimes
+- 🔍 Search packages across multiple registries
+- 📦 Get CDN import URLs for packages
+- 🔒 Check package vulnerabilities
+- 📊 Analyze bundle sizes and dependencies
+- ⚙️ Generate install/update/remove commands
+- 🌐 Access CDN providers (unpkg, jsdelivr, skypack, esm.sh, etc.)
 
-## Installation
+### Installation & Setup
 
-### Deno
+Add this MCP server to your MCP-compatible client (like Cursor, Claude Desktop, etc.):
 
-```ts
-import { search, searchAll } from "jsr:@registry/mcp@0.1.1";
-```
-
-### npm / Node.js
-
-```bash
-npm install @registry/mcp
-```
-
-```ts
-import { search, searchAll } from "@registry/mcp";
-```
-
-## Usage
-
-### Auto-Detect and Search
-
-The `search` function automatically detects which registry to query based on the package name:
-
-```ts
-import { search } from "@registry/mcp";
-
-// Searches JSR (detected from @scope/package format)
-const jsrResult = await search("@std/path");
-console.log(jsrResult.packages);
-
-// Searches npm (default for most packages)
-const npmResult = await search("lodash");
-console.log(npmResult.packages);
-
-// Searches Deno (detected from URL patterns)
-const denoResult = await search("https://deno.land/x/oak");
-console.log(denoResult.packages);
-```
-
-### Search All Registries
-
-Search across all registries simultaneously:
-
-```ts
-import { searchAll } from "@registry/mcp";
-
-const results = await searchAll("express");
-
-results.forEach((result) => {
-  console.log(`\n${result.registry.toUpperCase()} Results:`);
-  result.packages.forEach((pkg) => {
-    console.log(`- ${pkg.name}: ${pkg.description}`);
-  });
-});
-```
-
-### Search Specific Registry
-
-You can also search a specific registry directly:
-
-```ts
-import { searchNpm, searchJsr, searchDeno } from "@registry/mcp";
-
-// Search npm only
-const npmResults = await searchNpm("react", 10);
-
-// Search JSR only
-const jsrResults = await searchJsr("@std/encoding", 10);
-
-// Search Deno only
-const denoResults = await searchDeno("oak", 10);
-```
-
-### Registry Detection
-
-Detect which registry a package name belongs to:
-
-```ts
-import { detectRegistry, getRegistryInfo } from "@registry/mcp";
-
-const registry = detectRegistry("@std/path"); // "jsr"
-const info = getRegistryInfo(registry);
-console.log(info.name); // "JSR"
-console.log(info.url); // "https://jsr.io"
-```
-
-## API Reference
-
-### `search(query: string, limit?: number): Promise<SearchResult>`
-
-Auto-detects and searches the appropriate registry for the given query.
-
-**Parameters:**
-
-- `query` - Package name or search query
-- `limit` - Maximum number of results (default: 20)
-
-**Returns:** `Promise<SearchResult>`
-
-### `searchAll(query: string, limit?: number): Promise<SearchResult[]>`
-
-Searches all registries simultaneously.
-
-**Parameters:**
-
-- `query` - Search query
-- `limit` - Maximum number of results per registry (default: 20)
-
-**Returns:** `Promise<SearchResult[]>` - Array of results from npm, JSR, and Deno
-
-### `searchNpm(query: string, limit?: number): Promise<SearchResult>`
-
-Searches the npm registry.
-
-### `searchJsr(query: string, limit?: number): Promise<SearchResult>`
-
-Searches the JSR registry.
-
-### `searchDeno(query: string, limit?: number): Promise<SearchResult>`
-
-Searches the Deno registry.
-
-### `detectRegistry(packageName: string): RegistryType`
-
-Detects the most likely registry for a given package name.
-
-**Returns:** `"npm" | "jsr" | "deno" | "unknown"`
-
-### `getRegistryInfo(registry: RegistryType)`
-
-Gets metadata about a registry including URLs and search endpoints.
-
-## Types
-
-### `PackageInfo`
-
-```ts
-interface PackageInfo {
-  name: string;
-  version?: string;
-  description?: string;
-  author?: string;
-  license?: string;
-  repository?: string;
-  homepage?: string;
-  keywords?: string[];
-  registry: RegistryType;
-  registryUrl?: string;
-  publishedAt?: string;
-  downloads?: number;
-  dependencies?: Record<string, string>;
-  readme?: string;
-}
-```
-
-### `SearchResult`
-
-```ts
-interface SearchResult {
-  query: string;
-  registry: RegistryType;
-  packages: PackageInfo[];
-  total?: number;
-  error?: string;
-}
-```
-
-## Registry Detection Rules
-
-- **JSR**: Packages starting with `@` and containing `/` (e.g., `@std/path`)
-- **Deno**: URLs containing `deno.land` or `nest.land`, or starting with `https://`
-- **npm**: Default for most other cases
-- **Explicit**: `jsr:` and `npm:` specifiers are respected
-
-## Examples
-
-### CLI Tool Example
-
-```ts
-import { searchAll } from "@registry/mcp";
-
-const query = Deno.args[0] || "express";
-const results = await searchAll(query);
-
-for (const result of results) {
-  if (result.error) {
-    console.error(`Error searching ${result.registry}:`, result.error);
-    continue;
-  }
-
-  console.log(
-    `\n📦 ${result.registry.toUpperCase()} (${
-      result.total || result.packages.length
-    } results)`
-  );
-  console.log("─".repeat(50));
-
-  for (const pkg of result.packages.slice(0, 5)) {
-    console.log(`\n${pkg.name}${pkg.version ? `@${pkg.version}` : ""}`);
-    if (pkg.description) {
-      console.log(`  ${pkg.description}`);
-    }
-    if (pkg.registryUrl) {
-      console.log(`  🔗 ${pkg.registryUrl}`);
-    }
-  }
-}
-```
-
-### Find Package Across All Registries
-
-```ts
-import { searchAll } from "@registry/mcp";
-
-async function findPackage(name: string) {
-  const results = await searchAll(name);
-
-  for (const result of results) {
-    const exactMatch = result.packages.find(
-      (pkg) => pkg.name.toLowerCase() === name.toLowerCase()
-    );
-
-    if (exactMatch) {
-      console.log(`Found in ${result.registry}:`, exactMatch);
-      return exactMatch;
-    }
-  }
-
-  console.log("Package not found in any registry");
-  return null;
-}
-
-await findPackage("lodash");
-```
-
-## MCP Server
-
-This package includes an MCP (Model Context Protocol) server that exposes registry search tools for AI assistants.
-
-### Using the MCP Server
-
-The MCP server can be used with MCP-compatible clients:
+**For Cursor (`.cursor/mcp.json`):**
 
 ```json
 {
@@ -265,15 +30,538 @@ The MCP server can be used with MCP-compatible clients:
 }
 ```
 
+**Optional: Set default registry provider**
+
+```json
+{
+  "mcpServers": {
+    "@registry/mcp": {
+      "command": "deno",
+      "args": ["run", "--allow-net", "--allow-env", "jsr:@registry/mcp/mcp"],
+      "env": {
+        "REGISTRY_MCP_PROVIDER": "npm"
+      }
+    }
+  }
+}
+```
+
+Valid values: `npm`, `jsr`, `deno` (or omit for auto-detection)
+
 ### Available MCP Tools
 
-- `search_packages` - Auto-detect and search registry
-- `search_all_registries` - Search all registries simultaneously
-- `search_npm` - Search npm registry
-- `search_jsr` - Search JSR registry
-- `search_deno` - Search Deno registry
-- `detect_registry` - Detect registry for a package name
-- `get_registry_info` - Get registry metadata
+#### 🔍 Search Tools
+
+##### `search_packages`
+
+**When to use:** Search for packages with automatic registry detection.
+
+**Input:**
+
+```json
+{
+  "query": "lodash",
+  "limit": 20
+}
+```
+
+**Returns:**
+
+- Formatted text with emoji-enhanced results
+- JSON with package details (name, version, description, downloads, etc.)
+
+**Example:**
+
+```
+📦 NPM Results
+Query: "lodash"
+Total: 1 packages
+
+1. lodash @4.17.21
+   A modern JavaScript utility library delivering modularity, performance, & extras.
+   🔗 https://www.npmjs.com/package/lodash
+   📥 50,000,000 downloads
+```
+
+---
+
+##### `search_all_registries`
+
+**When to use:** Search across all registries (npm, JSR, Deno) simultaneously to find packages.
+
+**Input:**
+
+```json
+{
+  "query": "express",
+  "limit": 10
+}
+```
+
+**Returns:**
+
+- Results from npm, JSR, and Deno in formatted text
+- JSON array with results from each registry
+
+---
+
+##### `search_npm` / `search_jsr` / `search_deno`
+
+**When to use:** Search a specific registry when you know which one to target.
+
+**Input:**
+
+```json
+{
+  "query": "react",
+  "limit": 20
+}
+```
+
+**Returns:** Formatted search results from the specified registry
+
+---
+
+#### 🌐 CDN Tools
+
+##### `get_cdn_imports`
+
+**When to use:** Get CDN import URLs for a package to use in browsers or Deno without bundlers.
+
+**Input:**
+
+```json
+{
+  "packageName": "lodash",
+  "version": "4.17.21",
+  "registry": "npm"
+}
+```
+
+**Returns:**
+
+```
+🌐 CDN Imports for lodash
+Version: 4.17.21
+Registry: npm
+
+⭐ Recommended:
+🚀 skypack
+   URL: `https://cdn.skypack.dev/lodash@4.17.21`
+   Type: ESM (minified)
+   Optimized ESM packages with automatic bundling
+
+📋 All Available CDN Imports:
+1. 📦 unpkg - https://unpkg.com/lodash@4.17.21
+2. ⚡ jsdelivr - https://cdn.jsdelivr.net/npm/lodash@4.17.21
+3. 🚀 skypack - https://cdn.skypack.dev/lodash@4.17.21
+4. ✨ esm.sh - https://esm.sh/lodash@4.17.21
+...
+```
+
+**Supported CDNs:**
+
+- 📦 **unpkg** - Fast, global CDN
+- ⚡ **jsdelivr** - Fast, reliable CDN
+- ☁️ **cdnjs** - Cloudflare CDN
+- 🚀 **skypack** - Optimized ESM with bundling
+- ✨ **esm.sh** - Fast ESM with TypeScript support
+- 📚 **jsr.io** - Direct JSR imports
+- 🦕 **deno.land** - Direct Deno imports
+
+---
+
+##### `search_cdn`
+
+**When to use:** Search for packages available on CDN providers.
+
+**Input:**
+
+```json
+{
+  "query": "react",
+  "provider": "all",
+  "limit": 20
+}
+```
+
+**Provider options:** `cdnjs`, `unpkg`, `jsdelivr`, `skypack`, `esm.sh`, or `all`
+
+**Returns:** Search results with CDN URLs for each package
+
+---
+
+#### 🔒 Security & Analysis Tools
+
+##### `check_vuln`
+
+**When to use:** Check if a package has known security vulnerabilities before installing.
+
+**Input:**
+
+```json
+{
+  "packageName": "express",
+  "registry": "npm"
+}
+```
+
+**Returns:**
+
+```
+🔒 Security Check for express
+Registry: npm
+
+⚠️ Found 2 vulnerability/vulnerabilities:
+   🔴 Critical: 0
+   🟠 High: 1
+   🟡 Moderate: 1
+   🟢 Low: 0
+
+Details:
+1. 🟠 CVE-2022-24999 - Express vulnerability
+   Package: express
+   Affected: <4.18.0
+   Patched: >=4.18.0
+   🔗 https://nvd.nist.gov/vuln/detail/CVE-2022-24999
+```
+
+**Note:** Full vulnerability checking requires running `npm audit` locally after installation.
+
+---
+
+##### `check_bundle_size`
+
+**When to use:** Check the bundle size of a package to understand its impact on your application.
+
+**Input:**
+
+```json
+{
+  "packageName": "lodash",
+  "version": "4.17.21"
+}
+```
+
+**Returns:**
+
+```
+📦 Bundle Size for lodash
+Version: 4.17.21
+
+Minified: 71.23 KB
+Gzipped: 24.56 KB
+Brotli: 22.10 KB
+```
+
+---
+
+#### 📊 Dependency Analysis Tools
+
+##### `analyze_dependency`
+
+**When to use:** Get a comprehensive analysis of a package's dependencies (counts, types, etc.).
+
+**Input:**
+
+```json
+{
+  "packageName": "express",
+  "registry": "npm"
+}
+```
+
+**Returns:**
+
+```json
+{
+  "package": "express",
+  "registry": "npm",
+  "totalDependencies": 45,
+  "directDependencies": 30,
+  "devDependencies": 15,
+  "peerDependencies": 0,
+  "optionalDependencies": 0,
+  "hasVulnerabilities": false
+}
+```
+
+---
+
+##### `dependency_tree`
+
+**When to use:** Get the full dependency tree of a package to understand what it depends on.
+
+**Input:**
+
+```json
+{
+  "packageName": "express",
+  "version": "4.18.2"
+}
+```
+
+**Returns:** Complete dependency tree with all nested dependencies
+
+---
+
+##### `peer_deps`
+
+**When to use:** Check peer dependencies that need to be installed separately.
+
+**Input:**
+
+```json
+{
+  "packageName": "react-dom",
+  "registry": "npm"
+}
+```
+
+**Returns:**
+
+```json
+{
+  "package": "react-dom",
+  "peerDependencies": {
+    "react": "^18.0.0"
+  },
+  "registry": "npm"
+}
+```
+
+---
+
+##### `check_outdated`
+
+**When to use:** Generate a command to check for outdated packages in your project.
+
+**Input:**
+
+```json
+{
+  "registry": "npm",
+  "workspace": "./my-project"
+}
+```
+
+**Returns:**
+
+```json
+{
+  "command": "cd ./my-project && npm outdated --json",
+  "registry": "npm"
+}
+```
+
+---
+
+#### ⚙️ Package Management Tools
+
+##### `install`
+
+**When to use:** Generate install commands for packages.
+
+**Input:**
+
+```json
+{
+  "packageName": "lodash",
+  "version": "4.17.21",
+  "dev": false,
+  "registry": "npm",
+  "workspace": "./my-project"
+}
+```
+
+**Returns:**
+
+```json
+{
+  "success": true,
+  "message": "Install command generated for npm",
+  "registry": "npm",
+  "command": "cd ./my-project && npm install lodash@4.17.21 --save"
+}
+```
+
+---
+
+##### `remove`
+
+**When to use:** Generate remove/uninstall commands.
+
+**Input:**
+
+```json
+{
+  "packageName": "lodash",
+  "registry": "npm"
+}
+```
+
+**Returns:** Command to remove the package
+
+---
+
+##### `update`
+
+**When to use:** Generate update commands for packages.
+
+**Input:**
+
+```json
+{
+  "packageName": "lodash",
+  "latest": true,
+  "registry": "npm"
+}
+```
+
+**Returns:** Command to update the package (or all packages if `packageName` is omitted)
+
+---
+
+##### `ci`
+
+**When to use:** Generate CI commands for clean dependency installation.
+
+**Input:**
+
+```json
+{
+  "registry": "npm",
+  "workspace": "./my-project"
+}
+```
+
+**Returns:**
+
+```json
+{
+  "command": "cd ./my-project && npm ci",
+  "registry": "npm"
+}
+```
+
+---
+
+#### 🔧 Utility Tools
+
+##### `detect_registry`
+
+**When to use:** Detect which registry a package belongs to.
+
+**Input:**
+
+```json
+{
+  "packageName": "@std/path"
+}
+```
+
+**Returns:**
+
+```json
+{
+  "packageName": "@std/path",
+  "registry": "jsr"
+}
+```
+
+---
+
+##### `get_registry_info`
+
+**When to use:** Get metadata about a registry (URLs, endpoints, etc.).
+
+**Input:**
+
+```json
+{
+  "registry": "npm"
+}
+```
+
+**Returns:**
+
+```json
+{
+  "name": "npm",
+  "url": "https://www.npmjs.com",
+  "searchUrl": "https://registry.npmjs.org/-/v1/search",
+  "packageUrl": "https://www.npmjs.com/package/{name}"
+}
+```
+
+---
+
+### Registry Auto-Detection
+
+The MCP server automatically detects the registry based on package name patterns:
+
+- **JSR**: Packages starting with `@` and containing `/` (e.g., `@std/path`)
+- **Deno**: URLs containing `deno.land` or starting with `https://`
+- **npm**: Default for most other cases
+- **Explicit**: You can override by passing `registry` parameter
+
+### Registry Provider Selection
+
+You can set a default registry provider via environment variable:
+
+```json
+{
+  "mcpServers": {
+    "@registry/mcp": {
+      "command": "deno",
+      "args": ["run", "--allow-net", "--allow-env", "jsr:@registry/mcp/mcp"],
+      "env": {
+        "REGISTRY_MCP_PROVIDER": "npm"
+      }
+    }
+  }
+}
+```
+
+Or override per-tool call by passing the `registry` parameter.
+
+### Response Format
+
+All tools return responses in two formats:
+
+1. **Formatted text** - Human-readable with emojis and structure (for AI assistants to read)
+2. **JSON** - Structured data for programmatic use
+
+Example:
+
+```
+📦 NPM Results
+Query: "lodash"
+...
+
+{
+  "query": "lodash",
+  "registry": "npm",
+  "packages": [...]
+}
+```
+
+### When to Use Each Tool
+
+| Tool                            | Use Case                                   |
+| ------------------------------- | ------------------------------------------ |
+| `search_packages`               | General package search with auto-detection |
+| `search_all_registries`         | Find packages across all registries        |
+| `get_cdn_imports`               | Get CDN URLs for browser/Deno usage        |
+| `check_vuln`                    | Security audit before installation         |
+| `check_bundle_size`             | Performance planning                       |
+| `analyze_dependency`            | Understand package complexity              |
+| `dependency_tree`               | See full dependency graph                  |
+| `peer_deps`                     | Check required peer dependencies           |
+| `install` / `remove` / `update` | Generate package management commands       |
+| `ci`                            | Generate CI/CD commands                    |
+| `detect_registry`               | Identify package source                    |
+| `search_cdn`                    | Find packages on CDN providers             |
 
 ## CLI Usage
 

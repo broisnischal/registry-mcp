@@ -147,10 +147,11 @@ export async function searchDeno(
 export async function search(
     query: string,
     limit = 20,
+    registry?: RegistryType,
 ): Promise<SearchResult> {
-    const registry = detectRegistry(query);
+    const reg = registry || detectRegistry(query);
 
-    switch (registry) {
+    switch (reg) {
         case "npm":
             return searchNpm(query, limit);
         case "jsr":
