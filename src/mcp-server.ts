@@ -64,7 +64,7 @@ function getCDNEmoji(provider: CDNProvider): string {
 const server = new Server(
   {
     name: "@registry/mcp",
-    version: "0.1.0",
+    version: "0.1.2",
   },
   {
     capabilities: {
