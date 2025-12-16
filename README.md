@@ -563,18 +563,56 @@ Query: "lodash"
 | `detect_registry`               | Identify package source                    |
 | `search_cdn`                    | Find packages on CDN providers             |
 
-## CLI Usage
+## CLI Usage (Optional)
 
-You can also use this package as a CLI tool:
+This package is primarily designed as an **MCP server** for AI assistants. The CLI is provided for convenience but has limited functionality compared to the MCP server.
+
+### Why `npx` doesn't work
+
+`npx @registry/mcp` doesn't work because:
+
+- This is a **Deno package** (TypeScript), not a Node.js/npm package
+- `npx` requires packages to be published to npm with Node.js-compatible binaries
+- The package uses Deno-specific features and APIs
+
+### Using the CLI with Deno
+
+**Option 1: Direct Deno execution (Recommended)**
 
 ```bash
-npx jsr @registry/mcp search lodash
-npx jsr @registry/mcp search-all express
-npx jsr @registry/mcp search-npm react
-npx jsr @registry/mcp search-jsr @std/encoding
-npx jsr @registry/mcp search-deno oak
-npx jsr @registry/mcp detect @std/path
+deno run --allow-net --allow-env jsr:@registry/mcp/cli search lodash
+deno run --allow-net --allow-env jsr:@registry/mcp/cli search-all express
+deno run --allow-net --allow-env jsr:@registry/mcp/cli search-npm react
+deno run --allow-net --allow-env jsr:@registry/mcp/cli search-jsr @std/encoding
+deno run --allow-net --allow-env jsr:@registry/mcp/cli search-deno oak
+deno run --allow-net --allow-env jsr:@registry/mcp/cli detect @std/path
 ```
+
+**Option 2: Install globally with Deno (Recommended for frequent use)**
+
+```bash
+# Install once globally
+deno install --allow-net --allow-env --name registry-mcp jsr:@registry/mcp/cli
+
+# Then use directly from anywhere
+registry-mcp search lodash
+registry-mcp search-all express
+registry-mcp search-npm react
+registry-mcp search-jsr @std/encoding
+registry-mcp search-deno oak
+registry-mcp detect @std/path
+```
+
+**Available CLI Commands:**
+
+- `search <query>` - Auto-detect and search registry
+- `search-all <query>` - Search all registries
+- `search-npm <query>` - Search npm only
+- `search-jsr <query>` - Search JSR only
+- `search-deno <query>` - Search Deno only
+- `detect <package>` - Detect registry for package
+
+**Note:** For full functionality (CDN imports, vulnerability checking, bundle size, dependency analysis, etc.), use the **MCP server** instead of the CLI.
 
 ## License
 
