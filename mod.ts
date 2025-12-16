@@ -1,5 +1,5 @@
 /**
- * @mcp/registry-hub - Multi-Registry Package Search
+ * @registry/mcp - Multi-Registry Package Search
  * 
  * A unified tool to search across multiple JavaScript/TypeScript package registries
  * including npm, JSR, Deno, and more. Auto-detects the appropriate registry
@@ -7,7 +7,7 @@
  * 
  * @example
  * ```ts
- * import { search, searchAll } from "@mcp/registry-hub";
+ * import { search, searchAll } from "@registry/mcp";
  * 
  * // Auto-detect and search
  * const result = await search("lodash");

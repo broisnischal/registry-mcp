@@ -1,4 +1,4 @@
-# @mcp/registry-hub - Multi-Registry Package Search
+# @registry/mcp - Multi-Registry Package Search
 
 A unified tool to search across multiple JavaScript/TypeScript package registries including npm, JSR, Deno, and more. Auto-detects the appropriate registry and provides comprehensive library information.
 
@@ -15,17 +15,17 @@ A unified tool to search across multiple JavaScript/TypeScript package registrie
 ### Deno
 
 ```ts
-import { search, searchAll } from "jsr:@mcp/registry-hub@0.1.0";
+import { search, searchAll } from "jsr:@registry/mcp@0.1.0";
 ```
 
 ### npm / Node.js
 
 ```bash
-npm install @mcp/registry-hub
+npm install @registry/mcp
 ```
 
 ```ts
-import { search, searchAll } from "@mcp/registry-hub";
+import { search, searchAll } from "@registry/mcp";
 ```
 
 ## Usage
@@ -35,7 +35,7 @@ import { search, searchAll } from "@mcp/registry-hub";
 The `search` function automatically detects which registry to query based on the package name:
 
 ```ts
-import { search } from "@mcp/registry-hub";
+import { search } from "@registry/mcp";
 
 // Searches JSR (detected from @scope/package format)
 const jsrResult = await search("@std/path");
@@ -55,7 +55,7 @@ console.log(denoResult.packages);
 Search across all registries simultaneously:
 
 ```ts
-import { searchAll } from "@mcp/registry-hub";
+import { searchAll } from "@registry/mcp";
 
 const results = await searchAll("express");
 
@@ -72,7 +72,7 @@ results.forEach((result) => {
 You can also search a specific registry directly:
 
 ```ts
-import { searchNpm, searchJsr, searchDeno } from "@mcp/registry-hub";
+import { searchNpm, searchJsr, searchDeno } from "@registry/mcp";
 
 // Search npm only
 const npmResults = await searchNpm("react", 10);
@@ -89,7 +89,7 @@ const denoResults = await searchDeno("oak", 10);
 Detect which registry a package name belongs to:
 
 ```ts
-import { detectRegistry, getRegistryInfo } from "@mcp/registry-hub";
+import { detectRegistry, getRegistryInfo } from "@registry/mcp";
 
 const registry = detectRegistry("@std/path"); // "jsr"
 const info = getRegistryInfo(registry);
@@ -190,7 +190,7 @@ interface SearchResult {
 ### CLI Tool Example
 
 ```ts
-import { searchAll } from "@mcp/registry-hub";
+import { searchAll } from "@registry/mcp";
 
 const query = Deno.args[0] || "express";
 const results = await searchAll(query);
@@ -223,7 +223,7 @@ for (const result of results) {
 ### Find Package Across All Registries
 
 ```ts
-import { searchAll } from "@mcp/registry-hub";
+import { searchAll } from "@registry/mcp";
 
 async function findPackage(name: string) {
   const results = await searchAll(name);
@@ -256,5 +256,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Links
 
-- [JSR Package](https://jsr.io/@mcp/registry-hub)
+- [JSR Package](https://jsr.io/@registry/mcp)
 - [GitHub Repository](https://github.com/nees/npm-mcp)
