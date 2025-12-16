@@ -1,7 +1,3 @@
-/**
- * Registry detection utilities
- */
-
 import type { RegistryType } from "./types.ts";
 
 export interface RegistryInfo {
@@ -11,30 +7,14 @@ export interface RegistryInfo {
     packageUrl: (name: string) => string;
 }
 
-/**
- * Detects the most likely registry for a given package name
- * 
- * @param packageName - The package name to detect registry for
- * @returns The detected registry type
- * 
- * @example
- * ```ts
- * detectRegistry("@std/path"); // "jsr"
- * detectRegistry("lodash"); // "npm"
- * detectRegistry("https://deno.land/x/"); // "deno"
- * ```
- */
 export function detectRegistry(packageName: string): RegistryType {
-    // JSR packages typically use @scope/package format
     if (packageName.startsWith("@") && packageName.includes("/")) {
-        // Check if it's a JSR-style scope
         const parts = packageName.split("/");
         if (parts.length === 2 && parts[0].startsWith("@")) {
             return "jsr";
         }
     }
 
-    // Deno packages often have deno.land or nest.land URLs
     if (
         packageName.includes("deno.land") ||
         packageName.includes("nest.land") ||
@@ -44,26 +24,17 @@ export function detectRegistry(packageName: string): RegistryType {
         return "deno";
     }
 
-    // JSR packages can also use jsr: specifier
     if (packageName.startsWith("jsr:")) {
         return "jsr";
     }
 
-    // npm: specifier indicates npm
     if (packageName.startsWith("npm:")) {
         return "npm";
     }
 
-    // Default to npm for most common cases
     return "npm";
 }
 
-/**
- * Gets registry information and search URLs
- * 
- * @param registry - The registry type
- * @returns Registry metadata
- */
 export function getRegistryInfo(registry: RegistryType): RegistryInfo {
     const info = {
         npm: {

@@ -1,17 +1,6 @@
-/**
- * Registry search implementations
- */
-
 import { detectRegistry, getRegistryInfo } from "./detector.ts";
 import type { PackageInfo, RegistryType, SearchResult } from "./types.ts";
 
-/**
- * Searches npm registry
- * 
- * @param query - Search query
- * @param limit - Maximum number of results (default: 20)
- * @returns Search results from npm
- */
 export async function searchNpm(
     query: string,
     limit = 20,
@@ -62,20 +51,12 @@ export async function searchNpm(
     }
 }
 
-/**
- * Searches JSR registry
- * 
- * @param query - Search query
- * @param limit - Maximum number of results (default: 20)
- * @returns Search results from JSR
- */
 export async function searchJsr(
     query: string,
     limit = 20,
 ): Promise<SearchResult> {
     try {
         const registryInfo = getRegistryInfo("jsr");
-        // JSR API endpoint for searching packages
         const url = `https://jsr.io/api/packages?q=${encodeURIComponent(query)}&limit=${limit}`;
 
         const response = await fetch(url);
@@ -117,20 +98,12 @@ export async function searchJsr(
     }
 }
 
-/**
- * Searches Deno registry (deno.land/x)
- * 
- * @param query - Search query
- * @param limit - Maximum number of results (default: 20)
- * @returns Search results from Deno
- */
 export async function searchDeno(
     query: string,
     limit = 20,
 ): Promise<SearchResult> {
     try {
         const registryInfo = getRegistryInfo("deno");
-        // Deno API endpoint for searching modules
         const url = `https://api.deno.com/v2/modules?query=${encodeURIComponent(query)}&limit=${limit}`;
 
         const response = await fetch(url);
@@ -171,19 +144,6 @@ export async function searchDeno(
     }
 }
 
-/**
- * Auto-detects registry and searches the appropriate one
- * 
- * @param query - Package name or search query
- * @param limit - Maximum number of results (default: 20)
- * @returns Search results from the detected registry
- * 
- * @example
- * ```ts
- * const result = await search("@std/path"); // Searches JSR
- * const result2 = await search("lodash"); // Searches npm
- * ```
- */
 export async function search(
     query: string,
     limit = 20,
@@ -198,24 +158,10 @@ export async function search(
         case "deno":
             return searchDeno(query, limit);
         default:
-            // Default to npm for unknown
             return searchNpm(query, limit);
     }
 }
 
-/**
- * Searches all registries simultaneously
- * 
- * @param query - Search query
- * @param limit - Maximum number of results per registry (default: 20)
- * @returns Array of search results from all registries
- * 
- * @example
- * ```ts
- * const results = await searchAll("express");
- * // Returns results from npm, JSR, and Deno
- * ```
- */
 export async function searchAll(
     query: string,
     limit = 20,

@@ -246,6 +246,48 @@ async function findPackage(name: string) {
 await findPackage("lodash");
 ```
 
+## MCP Server
+
+This package includes an MCP (Model Context Protocol) server that exposes registry search tools for AI assistants.
+
+### Using the MCP Server
+
+The MCP server can be used with MCP-compatible clients:
+
+```json
+{
+  "mcpServers": {
+    "@registry/mcp": {
+      "command": "deno",
+      "args": ["run", "--allow-net", "--allow-env", "jsr:@registry/mcp/mcp"]
+    }
+  }
+}
+```
+
+### Available MCP Tools
+
+- `search_packages` - Auto-detect and search registry
+- `search_all_registries` - Search all registries simultaneously
+- `search_npm` - Search npm registry
+- `search_jsr` - Search JSR registry
+- `search_deno` - Search Deno registry
+- `detect_registry` - Detect registry for a package name
+- `get_registry_info` - Get registry metadata
+
+## CLI Usage
+
+You can also use this package as a CLI tool:
+
+```bash
+npx jsr @registry/mcp search lodash
+npx jsr @registry/mcp search-all express
+npx jsr @registry/mcp search-npm react
+npx jsr @registry/mcp search-jsr @std/encoding
+npx jsr @registry/mcp search-deno oak
+npx jsr @registry/mcp detect @std/path
+```
+
 ## License
 
 MIT

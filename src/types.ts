@@ -1,7 +1,3 @@
-/**
- * Type definitions for MCP package search results
- */
-
 export type RegistryType = "npm" | "jsr" | "deno" | "unknown";
 
 export interface PackageInfo {
